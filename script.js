@@ -1,6 +1,7 @@
 // Carousel functionality
 document.addEventListener('DOMContentLoaded', function() {
     const carousel = document.querySelector('.carousel-container');
+    const carouselWrapper = document.querySelector('.carousel');
     const slides = document.querySelectorAll('.carousel-slide');
     const dots = document.querySelectorAll('.carousel-dot');
 
@@ -9,8 +10,28 @@ document.addEventListener('DOMContentLoaded', function() {
     let autoplayInterval;
     const autoplayDelay = 8000; // 8 seconds
 
+    // Use visible width in pixels so each advance shows a full new image (fixes mobile)
+    function getSlideWidth() {
+        return carouselWrapper ? carouselWrapper.offsetWidth : window.innerWidth;
+    }
+
+    function applySlideWidths() {
+        const w = getSlideWidth();
+        slides.forEach(slide => {
+            slide.style.width = w + 'px';
+            slide.style.minWidth = w + 'px';
+        });
+    }
+
+    function applyTransform() {
+        const w = getSlideWidth();
+        carousel.style.transform = `translateX(-${currentSlide * w}px)`;
+    }
+
     // Initialize carousel
     function initCarousel() {
+        applySlideWidths();
+        applyTransform();
         updateDots();
         startAutoplay();
     }
@@ -24,7 +45,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         currentSlide = slideIndex;
-        carousel.style.transform = `translateX(-${currentSlide * 100}%)`;
+        applyTransform();
         updateDots();
         resetAutoplay();
     }
@@ -188,4 +209,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initialize carousel
     initCarousel();
+
+    // Re-measure on resize/orientation so mobile always shows full new images
+    window.addEventListener('resize', function() {
+        applySlideWidths();
+        applyTransform();
+    });
 });
